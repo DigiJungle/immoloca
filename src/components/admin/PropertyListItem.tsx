@@ -1,7 +1,7 @@
 import React from 'react';
 import { Property } from '../../types'; 
-import { PropertyActions } from './PropertyActions';
-import { MoreVertical } from 'lucide-react';
+import { MoreVertical, ExternalLink, Edit, Copy, Trash2 } from 'lucide-react';
+import { slugify } from '../../lib/slugify';
 
 interface PropertyListItemProps {
   property: Property & {
@@ -15,6 +15,19 @@ interface PropertyListItemProps {
 
 export function PropertyListItem({ property, viewMode, onClick, onAction }: PropertyListItemProps) {
   const [showActions, setShowActions] = React.useState(false);
+  
+  const handleViewProperty = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const propertySlug = `${slugify(property.title)}/${property.slug}`;
+    window.open(`/property/${propertySlug}`, '_blank');
+  };
+  
+  const handleCopyLink = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const propertySlug = `${slugify(property.title)}/${property.slug}`;
+    navigator.clipboard.writeText(`${window.location.origin}/property/${propertySlug}`);
+    alert('Lien copié dans le presse-papier !');
+  };
 
   if (viewMode === 'grid') {
     return (
@@ -44,13 +57,57 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
               {property.price.toLocaleString('fr-FR')} €
               {property.type === 'rent' && <span className="text-sm text-gray-500">/mois</span>}
             </div>
-            <div className="relative z-10">
-              <PropertyActions
-                onAction={onAction}
-                isOpen={showActions}
-                onToggle={() => setShowActions(!showActions)}
-                property={property}
-              />
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowActions(!showActions);
+                }}
+                className="text-gray-400 hover:text-gray-900 p-2 rounded-full hover:bg-gray-100 relative z-50"
+              >
+                <MoreVertical className="w-5 h-5" />
+              </button>
+              {showActions && (
+                <div 
+                  className="absolute right-14 top-0 bg-white rounded-lg shadow-lg py-1 z-[100] border border-gray-100"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button
+                    onClick={handleViewProperty}
+                    className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    Voir le bien
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAction('edit');
+                    }}
+                    className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Modifier
+                  </button>
+                  <button
+                    onClick={handleCopyLink}
+                    className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                  >
+                    <Copy className="w-4 h-4 mr-2" />
+                    Copier le lien
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAction('delete');
+                    }}
+                    className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Supprimer
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -104,12 +161,56 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
         )}
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative z-10">
-        <PropertyActions
-          onAction={onAction}
-          isOpen={showActions}
-          onToggle={() => setShowActions(!showActions)}
-          property={property}
-        />
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setShowActions(!showActions);
+          }}
+          className="text-gray-400 hover:text-gray-900 p-2 rounded-full hover:bg-gray-100 relative z-50"
+        >
+          <MoreVertical className="w-5 h-5" />
+        </button>
+        {showActions && (
+          <div 
+            className="absolute right-14 top-0 bg-white rounded-lg shadow-lg py-1 z-[100] border border-gray-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={handleViewProperty}
+              className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+            >
+              <ExternalLink className="w-4 h-4 mr-2" />
+              Voir le bien
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAction('edit');
+              }}
+              className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Modifier
+            </button>
+            <button
+              onClick={handleCopyLink}
+              className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              Copier le lien
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onAction('delete');
+              }}
+              className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Supprimer
+            </button>
+          </div>
+        )}
       </td>
     </tr>
   );

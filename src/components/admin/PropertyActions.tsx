@@ -18,13 +18,13 @@ export function PropertyActions({ onAction, isOpen, onToggle, property }: Proper
           e.stopPropagation();
           onToggle();
         }}
-        className="text-gray-400 hover:text-gray-900 p-2 rounded-full hover:bg-gray-100"
+        className="text-gray-400 hover:text-gray-900 p-2 rounded-full hover:bg-gray-100 relative z-50"
       >
         <MoreVertical className="w-5 h-5" />
       </button>
       {isOpen && (
         <div 
-          className="absolute right-14 top-0 bg-white rounded-lg shadow-lg py-1 z-10 border border-gray-100"
+          className="absolute right-14 top-0 bg-white rounded-lg shadow-lg py-1 z-[100] border border-gray-100"
           onClick={(e) => e.stopPropagation()}
         >
           <button

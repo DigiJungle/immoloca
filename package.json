@@ -10,23 +10,22 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.39.7",
-    "date-fns": "^3.3.1",
-    "mailersend": "^2.2.0",
     "@googlemaps/js-api-loader": "^1.16.6",
+    "@supabase/supabase-js": "^2.39.7",
+    "@tanstack/react-query": "^5.24.1",
+    "date-fns": "^3.3.1",
     "lucide-react": "^0.344.0",
+    "mailersend": "^2.2.0",
     "openai": "^4.28.0",
     "pdfjs-dist": "^3.11.174",
-    "resend": "^3.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^6.22.3",
-    "@tanstack/react-query": "^5.24.1"
+    "react-router-dom": "^6.22.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
-    "@types/react": "^18.3.5",
     "@types/google.maps": "^3.55.4",
+    "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.18",
