@@ -1,76 +1,64 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.7';
 
-const DOCUMENT_TYPE_LABELS = {
-  identity: 'Pièce d\'identité',
-  income: 'Justificatifs de revenus',
-  tax: 'Avis d\'imposition',
-  residence: 'Justificatif de domicile',
-  guarantor: 'Documents du garant',
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
 serve(async (req) => {
-  try {
-    const { recipientEmail, applicationId, document_type, comment } = await req.json();
+  // Handle CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
 
-    // Vérification des paramètres requis
-    if (!applicationId || !document_type || !comment || !recipientEmail) {
-      return new Response(
-        JSON.stringify({ error: 'Missing required parameters' }),
-        { status: 400 }
-      );
+  try {
+    if (req.method !== 'POST') {
+      return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+        status: 405,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
-    // Initialiser le client Supabase
+    const { recipientEmail, applicationId, document_type, comment } = await req.json();
+
+    if (!recipientEmail || !applicationId || !document_type || !comment) {
+      return new Response(JSON.stringify({ error: 'Missing required parameters' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Initialize Supabase client
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       { auth: { persistSession: false } }
     );
 
-    // Récupérer le template d'email
-    const { data: template, error: templateError } = await supabaseAdmin
-      .from('notifications')
-      .select('*')
-      .eq('type', 'document_rejection')
-      .single();
+    // Log the rejection
+    await supabaseAdmin
+      .from('notification_logs')
+      .insert({
+        application_id: applicationId,
+        notification_type: 'document_rejection',
+        notification_data: {
+          document_type,
+          comment,
+          recipient: recipientEmail
+        }
+      });
 
-    if (templateError) {
-      throw new Error('Failed to fetch email template');
-    }
+    return new Response(JSON.stringify({ success: true }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
 
-    // Remplacer les variables dans le template
-    const htmlContent = template.content_html
-      .replace('{{ document_type }}', document_type)
-      .replace('{{ comment }}', comment);
-
-    const textContent = template.content_text
-      .replace('{{ document_type }}', document_type)
-      .replace('{{ comment }}', comment);
-
-    // Envoyer l'email
-    const { error: emailError } = await supabaseAdmin.auth.admin.sendEmail(
-      recipientEmail,
-      template.subject,
-      {
-        html: htmlContent,
-        text: textContent,
-      }
-    );
-
-    if (emailError) {
-      throw emailError;
-    }
-
-    return new Response(
-      JSON.stringify({ success: true }),
-      { status: 200 }
-    );
   } catch (error) {
-    console.error('Error sending email:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      { status: 500 }
-    );
+    console.error('Error:', error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
   }
 });
