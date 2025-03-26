@@ -3,16 +3,22 @@ import OpenAI from 'openai';
 import { convertPDFToImage } from './pdfService';
 import { format, subMonths, startOfMonth } from 'date-fns';
 
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY || process.env.VITE_OPENAI_API_KEY;
+let openai: OpenAI | null = null;
 
-if (!OPENAI_API_KEY && process.env.NODE_ENV !== 'development') {
-  console.warn('VITE_OPENAI_API_KEY is not defined in environment variables');
-}
+const getOpenAIClient = () => {
+  if (!openai) {
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new Error('OpenAI API key is required for document analysis');
+    }
+    openai = new OpenAI({
+      apiKey,
+      dangerouslyAllowBrowser: true
+    });
+  }
+  return openai;
+};
 
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-  dangerouslyAllowBrowser: true
-});
 
 // Fonction pour obtenir les 3 derniers mois
 function getValidPayslipPeriods(): string[] {
@@ -202,6 +208,9 @@ export async function analyzeDocument({ url, expectedType, isPDF }: { url: strin
   try {
     console.log('Starting document analysis...');
     
+    // Get OpenAI client only when needed
+    const ai = getOpenAIClient();
+    
     // Validate input
     if (!url) {
       throw new Error('URL is required for document analysis');
@@ -244,7 +253,7 @@ export async function analyzeDocument({ url, expectedType, isPDF }: { url: strin
     }
     
     console.log('Sending request to GPT-4 Vision...');
-    const response = await openai.chat.completions.create({
+    const response = await ai.chat.completions.create({
       model: "gpt-4o-mini",
       response_format: { type: "json_object" },
       messages: [

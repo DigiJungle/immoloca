@@ -1,6 +1,7 @@
 import React from 'react';
-import { Property } from '../../types';
+import { Property } from '../../types'; 
 import { PropertyActions } from './PropertyActions';
+import { MoreVertical } from 'lucide-react';
 
 interface PropertyListItemProps {
   property: Property & {
@@ -43,15 +44,14 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
               {property.price.toLocaleString('fr-FR')} €
               {property.type === 'rent' && <span className="text-sm text-gray-500">/mois</span>}
             </div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowActions(!showActions);
-              }}
-              className="p-2 hover:bg-gray-100 rounded-full"
-            >
-              <MoreVertical className="w-5 h-5 text-gray-500" />
-            </button>
+            <div className="relative z-10">
+              <PropertyActions
+                onAction={onAction}
+                isOpen={showActions}
+                onToggle={() => setShowActions(!showActions)}
+                property={property}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -103,7 +103,7 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
           <span className="text-sm text-gray-500">Aucune</span>
         )}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative">
+      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative z-10">
         <PropertyActions
           onAction={onAction}
           isOpen={showActions}

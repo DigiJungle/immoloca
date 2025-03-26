@@ -80,7 +80,7 @@ export function PropertyDetailPage() {
   useEffect(() => {
     if (property && mapRef.current) {
       const loader = new Loader({
-        apiKey: 'AIzaSyDVElEPu4EAk_nQ6P7k9c94ris-VoApFzk',
+        apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
         version: 'weekly',
         libraries: ['places']
       });
@@ -338,7 +338,7 @@ export function PropertyDetailPage() {
               </div>
             </div>
             <div className="grid grid-cols-3 gap-2 sm:gap-6 max-w-xl">
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4">
+              <div className="bg-black/10 backdrop-blur-sm rounded-xl p-4">
                 <div className="flex items-center space-x-3">
                   <Euro className="w-6 h-6 text-white/80" />
                   <div>
