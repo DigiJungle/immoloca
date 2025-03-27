@@ -6,12 +6,14 @@ import { useNavigate, useSearchParams, useParams } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { ApplicationDetailPage } from './ApplicationDetailPage';
 import { trackPropertyView } from '../lib/analytics';
+import { useLocation } from 'react-router-dom';
 import { GroupVisitModal } from '../components/GroupVisitModal';
 
 export function AdminPropertyDetailPage() {
   const { id } = useParams();
   const [property, setProperty] = useState<Property | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const [applications, setApplications] = useState<any[]>([]);
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -98,12 +100,14 @@ export function AdminPropertyDetailPage() {
 
   const fetchViewsCount = async (propertyId: string) => {
     try {
-      const { count } = await supabase
-        .from('property_views')
-        .select('*', { count: 'exact', head: true })
-        .eq('property_id', propertyId);
+      const { data, error } = await supabase
+        .from('properties')
+        .select('views_count')
+        .eq('id', propertyId)
+        .single();
 
-      setViewsCount(count || 0);
+      if (error) throw error;
+      setViewsCount(data.views_count || 0);
     } catch (error) {
       console.error('Error fetching views count:', error);
     } finally {
@@ -192,13 +196,31 @@ export function AdminPropertyDetailPage() {
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <button
-          onClick={() => navigate('/admin')}
-          className="flex items-center text-gray-600 hover:text-gray-900 group mb-4"
-        >
-          <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
-          Retour à la liste
-        </button>
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={() => {
+              // Retourner à la page précédente avec les paramètres de recherche
+              if (location.state?.from === '/admin') {
+                navigate('/admin', {
+                  state: {
+                    viewMode: location.state.viewMode,
+                    scrollPosition: location.state.scrollPosition,
+                    searchQuery: location.state.searchQuery,
+                    propertyType: location.state.propertyType,
+                    sortBy: location.state.sortBy,
+                    sortOrder: location.state.sortOrder
+                  }
+                });
+              } else {
+                navigate('/admin');
+              }
+            }}
+            className="flex items-center text-gray-600 hover:text-gray-900 group"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2 transition-transform group-hover:-translate-x-1" />
+            Retour à la liste
+          </button>
+        </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:flex lg:flex-row">
           {/* Property Info */}
           <div className="lg:col-span-1 space-y-6 order-2 lg:order-1 lg:w-1/3">
@@ -236,7 +258,7 @@ export function AdminPropertyDetailPage() {
                     <div className="flex items-center space-x-2">
                       <div className="flex items-center bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
                         <Eye className="w-4 h-4 mr-1" />
-                        <span className="text-sm font-medium">{viewsCount}</span>
+                        <span className="text-sm font-medium">{property.views_count?.toLocaleString('fr-FR') || 0}</span>
                       </div>
                     </div>
                   </div>
@@ -387,16 +409,21 @@ export function AdminPropertyDetailPage() {
           {/* Applications List */}
           <div className="lg:col-span-2 order-1 lg:order-2 lg:flex-1 sticky top-24">
             <div className="bg-white rounded-xl shadow-lg">
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="bg-white z-10 border-b border-gray-200">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-6">
                   <h2 className="text-xl font-semibold">Candidatures</h2>
-                  <div className="flex items-center gap-2 overflow-x-auto whitespace-nowrap pb-2 sm:pb-0">
+                  <div 
+                    className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0 touch-pan-x hide-scrollbar"
+                    style={{
+                      WebkitOverflowScrolling: 'touch'
+                    }}
+                  >
                       <button
                         onClick={() => setStatusFilter('pending')}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                           statusFilter === 'pending'
-                            ? 'bg-amber-500 text-white shadow-lg transform'
-                            : 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                            ? 'bg-gradient-to-r from-amber-500 to-orange-400 text-white shadow-lg transform'
+                            : 'bg-orange-50 text-orange-600'
                         }`}
                       >
                         À traiter ({applications.filter(a => a.status === 'pending').length})
@@ -405,8 +432,8 @@ export function AdminPropertyDetailPage() {
                         onClick={() => setStatusFilter('approved')}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                           statusFilter === 'approved'
-                            ? 'bg-emerald-500 text-white shadow-lg transform'
-                            : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                            ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-white shadow-lg transform'
+                            : 'bg-teal-50 text-teal-600'
                         }`}
                       >
                         Validées ({applications.filter(a => a.status === 'approved').length})
@@ -415,26 +442,29 @@ export function AdminPropertyDetailPage() {
                         onClick={() => setStatusFilter('rejected')}
                         className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                           statusFilter === 'rejected'
-                            ? 'bg-rose-500 text-white shadow-lg transform'
-                            : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
+                            ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-lg transform'
+                            : 'bg-rose-50 text-rose-500'
                         }`}
                       >
                         Refusées ({applications.filter(a => a.status === 'rejected').length})
                       </button>
                   </div>
-                  {statusFilter === 'approved' && selectedApplications.length > 0 && (
-                    <button
-                      onClick={() => {
-                        setShowGroupVisitModal(true);
-                      }}
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition-all duration-200 flex items-center gap-2 whitespace-nowrap"
-                    >
-                      <Calendar className="w-4 h-4" />
-                      Planifier visite ({selectedApplications.length})
-                    </button>
-                  )}
                 </div>
               </div>
+              {/* Sticky button */}
+              {statusFilter === 'approved' && selectedApplications.length > 0 && (
+                <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+                  <button
+                    onClick={() => {
+                      setShowGroupVisitModal(true);
+                    }}
+                    className="px-6 py-3 bg-gradient-to-r from-indigo-500 to-violet-500 text-white rounded-xl text-sm font-medium hover:from-indigo-600 hover:to-violet-600 transition-all duration-200 flex items-center gap-2 whitespace-nowrap shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Planifier visite ({selectedApplications.length})
+                  </button>
+                </div>
+              )}
 
               {loading ? (
                 <div className="p-6 text-center">
@@ -456,9 +486,6 @@ export function AdminPropertyDetailPage() {
                     >
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex-1 min-w-0">
-                          <div className="text-xs text-gray-400 mb-1">
-                            Candidature déposée le {application.createdAt.toLocaleDateString('fr-FR')}
-                          </div>
                           <div className="flex items-center gap-2">
                             <h3 className="text-lg font-medium text-gray-900">
                               {application.firstName} {application.lastName}
@@ -494,6 +521,9 @@ export function AdminPropertyDetailPage() {
                                 })()}
                               </div>
                             )}
+                          </div>
+                                                    <div className="text-xs text-gray-400 mb-1">
+                            Candidature déposée le {application.createdAt.toLocaleDateString('fr-FR')}
                           </div>
                           <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-y-4 gap-x-8">
                             <div className="flex items-center text-sm text-gray-600">

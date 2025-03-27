@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { Property } from '../types';
 import { Euro, Maximize2, BedDouble, MapPin, Search, ArrowRight, LogIn, Building2, UserPlus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -54,6 +55,34 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Helmet>
+        <title>Trouvez votre futur chez-vous à La Réunion | Immobilier</title>
+        <meta name="description" content="Découvrez des biens d'exception à La Réunion. Plus de 500 biens disponibles, location et vente d'appartements, maisons et villas." />
+        <meta name="keywords" content="immobilier, La Réunion, location, vente, appartement, maison, villa" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:title" content="Trouvez votre futur chez-vous à La Réunion | Immobilier" />
+        <meta property="og:description" content="Découvrez des biens d'exception à La Réunion. Plus de 500 biens disponibles, location et vente d'appartements, maisons et villas." />
+        <meta property="og:image" content="https://www.okvoyage.com/wp-content/uploads/2023/10/photos-de-la-reunion.jpg" />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={window.location.href} />
+        <meta property="twitter:title" content="Trouvez votre futur chez-vous à La Réunion | Immobilier" />
+        <meta property="twitter:description" content="Découvrez des biens d'exception à La Réunion. Plus de 500 biens disponibles, location et vente d'appartements, maisons et villas." />
+        <meta property="twitter:image" content="https://www.okvoyage.com/wp-content/uploads/2023/10/photos-de-la-reunion.jpg" />
+
+        {/* Additional SEO */}
+        <link rel="canonical" href={window.location.href} />
+        <meta name="robots" content="index, follow" />
+        <meta name="author" content="Immobilier La Réunion" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="theme-color" content="#f43f5e" />
+      </Helmet>
+
       {/* Login Link */}
       <div className="absolute top-6 right-6 z-10 flex items-center space-x-6">
         <div className="relative group">

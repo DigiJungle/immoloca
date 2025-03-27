@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 import OpenAI from 'openai';
 import { convertPDFToImage } from './pdfService';
+import { formatName } from './formatters';
 import { format, subMonths, startOfMonth } from 'date-fns';
 
 let openai: OpenAI | null = null;
@@ -269,7 +270,7 @@ export async function analyzeDocument({ url, expectedType, isPDF }: { url: strin
   "extracted_information": {
     // For identity documents
     "surname": "string",
-    "given_names": "string",
+    "given_names": "string",// only the first given name !
     "nationality": "string",
     "date_of_birth": "string",
     "document_number": "string",
@@ -357,12 +358,22 @@ Rules:
     // Ensure extracted_information is always an object
     const extractedData = analysis.extracted_information || {};
     console.log('Final extracted data:', extractedData);
-
+    
+    // Format names in extracted data if it's an identity document
+    if (analysis.document_type === 'identity') {
+      if (extractedData.surname) {
+        extractedData.surname = formatName(extractedData.surname);
+      }
+      if (extractedData.given_names) {
+        extractedData.given_names = formatName(extractedData.given_names);
+      }
+    }
+    
     // Set document type and validity
     result.documentType = analysis.document_type;
     result.isValid = analysis.validity_assessment === 'Valid';
     result.confidence = 0.9;
-    result.extractedData = analysis.extracted_information;
+    result.extractedData = extractedData;
 
     if (expectedType && result.documentType !== expectedType) {
       return {

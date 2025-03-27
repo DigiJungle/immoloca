@@ -1066,4 +1066,5 @@ function GuidedDocumentUpload({ propertyId, onComplete }: GuidedDocumentUploadPr
   );
 }
 
-export { GuidedDocumentUpload };
+
+export { GuidedDocumentUpload }

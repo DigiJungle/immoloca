@@ -1,6 +1,6 @@
 import React from 'react';
 import { Property } from '../../types'; 
-import { MoreVertical, ExternalLink, Edit, Copy, Trash2 } from 'lucide-react';
+import { MoreVertical, ExternalLink, Edit, Copy, Trash2, Eye } from 'lucide-react';
 import { slugify } from '../../lib/slugify';
 
 interface PropertyListItemProps {
@@ -29,9 +29,14 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
     alert('Lien copié dans le presse-papier !');
   };
 
+  const pendingApplications = property.applications?.filter(a => a.status === 'pending').length || 0;
+
   if (viewMode === 'grid') {
     return (
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer transform transition-all duration-300 hover:shadow-md hover:scale-[1.02]">
+      <div 
+        onClick={onClick}
+        className="bg-white rounded-xl shadow-sm overflow-hidden cursor-pointer transform transition-all duration-300 hover:shadow-md hover:scale-[1.02]"
+      >
         <div className="relative h-48">
           <img
             src={property.images[0]}
@@ -43,9 +48,9 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
               {property.type === 'sale' ? 'À Vendre' : 'À Louer'}
             </span>
           </div>
-          {property.applications && property.applications.filter(a => a.status === 'pending').length > 0 && (
+          {pendingApplications > 0 && (
             <div className="absolute bottom-2 right-2 bg-amber-500 text-white px-3 py-1 rounded-full text-sm font-medium shadow-lg">
-              {property.applications.filter(a => a.status === 'pending').length} en attente
+              {pendingApplications} en attente
             </div>
           )}
         </div>
@@ -146,8 +151,11 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
         {property.surface} m²
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-        {property.views_count || 0}
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center text-sm text-gray-500">
+          <Eye className="w-4 h-4 mr-1.5" />
+          <span>{property.views_count?.toLocaleString('fr-FR') || 0}</span>
+        </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap">
         {property.applications?.length > 0 ? (

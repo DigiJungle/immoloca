@@ -135,3 +135,31 @@ input[type="range"]::-moz-range-thumb:hover {
     opacity: 0;
   }
 }
+
+.factorial-input {
+  color: inherit;
+  width: 100px;
+  text-align: center;
+  -webkit-overflow-scrolling: touch;
+}
+
+.factorial-input:hover {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+  }
+}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Property } from '../types';
 import { slugify } from '../lib/slugify';
@@ -90,14 +91,18 @@ export function PropertyDetailPage() {
         const geocoder = new google.maps.Geocoder();
         
         // Géocoder l'adresse
-        const { results } = await geocoder.geocode({
+        const geocodeResponse = await geocoder.geocode({
           address: `${property.location}, La Réunion, France`
         });
         
-        const location = results[0]?.geometry.location || { 
+        // Default location for La Réunion if geocoding fails
+        const defaultLocation = {
           lat: -21.115141, 
           lng: 55.536384 
         };
+
+        // Use first result's location or fall back to default
+        const location = geocodeResponse.results?.[0]?.geometry?.location || defaultLocation;
         
         const map = new google.maps.Map(mapRef.current!, {
           center: location,
@@ -170,6 +175,7 @@ export function PropertyDetailPage() {
   const handleDocumentsComplete = (completedDocuments: Record<string, DocumentAnalysisResult>) => {
     setDocuments(completedDocuments);
     setShowSummaryModal(true);
+    setShowApplicationForm(false);
   };
 
   const nextImage = () => {
@@ -230,6 +236,58 @@ export function PropertyDetailPage() {
 
   return (
     <div className="min-h-screen bg-white">
+      <Helmet>
+        <title>{property ? `${property.title} - ${property.location} | Immobilier La Réunion` : 'Chargement...'}</title>
+        <meta name="description" content={property ? 
+          `${property.type === 'sale' ? 'À vendre' : 'À louer'} : ${property.title} à ${property.location}. ${property.surface}m², ${property.rooms} pièces, ${property.bedrooms} chambres. ${property.description.slice(0, 150)}...` : 
+          'Chargement de la propriété...'
+        } />
+        <meta name="keywords" content={property ? 
+          `immobilier, ${property.type === 'sale' ? 'vente' : 'location'}, ${property.location}, ${property.property_type}, ${property.rooms} pièces, ${property.surface}m²` : 
+          'immobilier, La Réunion'
+        } />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={window.location.href} />
+        <meta property="og:title" content={property ? `${property.title} - ${property.location} | Immobilier La Réunion` : 'Chargement...'} />
+        <meta property="og:description" content={property ? 
+          `${property.type === 'sale' ? 'À vendre' : 'À louer'} : ${property.title} à ${property.location}. ${property.surface}m², ${property.rooms} pièces, ${property.bedrooms} chambres.` : 
+          'Chargement de la propriété...'
+        } />
+        <meta property="og:image" content={property?.images[0] || 'https://www.okvoyage.com/wp-content/uploads/2023/10/photos-de-la-reunion.jpg'} />
+
+        {/* Twitter */}
+        <meta property="twitter:card" content="summary_large_image" />
+        <meta property="twitter:url" content={window.location.href} />
+        <meta property="twitter:title" content={property ? `${property.title} - ${property.location} | Immobilier La Réunion` : 'Chargement...'} />
+        <meta property="twitter:description" content={property ? 
+          `${property.type === 'sale' ? 'À vendre' : 'À louer'} : ${property.title} à ${property.location}. ${property.surface}m², ${property.rooms} pièces, ${property.bedrooms} chambres.` : 
+          'Chargement de la propriété...'
+        } />
+        <meta property="twitter:image" content={property?.images[0] || 'https://www.okvoyage.com/wp-content/uploads/2023/10/photos-de-la-reunion.jpg'} />
+
+        {/* Additional SEO */}
+        <link rel="canonical" href={window.location.href} />
+        <meta name="robots" content="index, follow" />
+        <meta name="author" content="Immobilier La Réunion" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta name="theme-color" content="#f43f5e" />
+
+        {/* Property specific metadata */}
+        {property && (
+          <>
+            <meta property="og:price:amount" content={property.price.toString()} />
+            <meta property="og:price:currency" content="EUR" />
+            <meta property="product:price:amount" content={property.price.toString()} />
+            <meta property="product:price:currency" content="EUR" />
+            <meta property="product:availability" content={property.available_from ? 'preorder' : 'in stock'} />
+            <meta property="product:condition" content="new" />
+          </>
+        )}
+      </Helmet>
+
       {/* Full-screen image gallery */}
       {showImageGallery && (
         <div className="fixed inset-0 bg-black z-50 flex items-center justify-center">
@@ -538,6 +596,7 @@ export function PropertyDetailPage() {
                   <GuidedDocumentUpload 
                     propertyId={property.id} 
                     onComplete={handleDocumentsComplete} 
+                    showSuccessState={showApplicationSuccess}
                   />
                 </div>
               </div>

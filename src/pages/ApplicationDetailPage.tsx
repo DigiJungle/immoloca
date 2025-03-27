@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ApplicationForm, Property } from '../types';
-import { ArrowLeft, User, Phone, Mail, FileText, Calendar, CheckCircle, Clock, XCircle, ThumbsUp, ThumbsDown, Briefcase, Euro, Building2, Users, ExternalLink, BarChart3 } from 'lucide-react';
+import { ArrowLeft, User, Phone, Mail, FileText, Calendar, CheckCircle, Clock, XCircle, ThumbsUp, ThumbsDown, Briefcase, Euro, Building2, Users, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { sendDocumentRejectionEmail } from '../lib/email';
@@ -169,24 +169,14 @@ function ApplicationDetailPage({ application, property, onClose, isOpen }: Appli
                   year: 'numeric'
                 })}
               </div>
-              <div className={`px-3 py-1 rounded-full text-sm font-medium sm:hidden mt-2 inline-flex ${
-                application.score >= 80 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                application.score >= 60 ? 'bg-amber-50 text-amber-700 border border-amber-200' :
-                'bg-rose-50 text-rose-700 border border-rose-200'
-              }`}>
-                <span className="flex items-center">
-                  <BarChart3 className="w-4 h-4 mr-1.5" />
-                  Score : {application.score}/100
-                </span>
-              </div>
             </div>
           </div>
         </div>
 
         {/* Content */}
-        <div className="flex-1 flex flex-col lg:flex-row relative overflow-y-auto">
+        <div className="flex-1 flex flex-col lg:flex-row relative overflow-x-auto">
           {/* Mobile Tabs */}
-          <div className="lg:hidden px-4 py-2 border-b border-gray-200 overflow-x-auto bg-white sticky top-0 z-10">
+          <div className="lg:hidden px-4 py-2 border-b border-gray-200 bg-white sticky top-0 z-10">
             <div className="flex space-x-2">
               <button
                 onClick={() => setActiveTab('info')}

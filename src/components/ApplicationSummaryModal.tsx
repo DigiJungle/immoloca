@@ -154,17 +154,6 @@ function ApplicationSummaryModal({ isOpen, onClose, documents, property }: Appli
         throw new Error('Failed to get application ID');
       }
 
-      // Send confirmation email
-      await sendApplicationEmail(
-        newApplication.id,
-        'application_submitted',
-        {
-          property_title: propertyData.title,
-          property_price: propertyData.price.toLocaleString('fr-FR'),
-          property_location: propertyData.location
-        }
-      );
-
       // Close modal and redirect
       setSubmissionSuccess(true);
       

@@ -8,7 +8,7 @@ interface StatsCardsSkeletonProps {
 
 function StatsCardsSkeleton({ count = 4 }: StatsCardsSkeletonProps) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {Array.from({ length: count }).map((_, index) => (
         <div key={index} className="bg-white rounded-xl shadow-sm p-6 animate-pulse">
           <div className="flex items-center justify-between">
@@ -44,11 +44,11 @@ interface StatsCardsProps {
 
 export function StatsCards({ stats, loading = false }: StatsCardsProps) {
   if (loading) {
-    return <StatsCardsSkeleton />;
+    return <StatsCardsSkeleton count={4} />;
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {/* Total Properties */}
       <StatsCard
         title="Total des biens"

@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
 import { AdminLayout } from './components/AdminLayout';
 import { AdminPage } from './pages/AdminPage';
 import { AdminPropertyDetailPage } from './pages/AdminPropertyDetailPage';
@@ -42,8 +43,9 @@ function AuthenticatedRoute() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Routes>
+      <HelmetProvider>
+        <Router>
+          <Routes>
           {/* Public routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/property/*" element={<PropertyDetailPage />} />
@@ -80,7 +82,8 @@ function App() {
             }
           />
         </Routes>
-      </Router>
+        </Router>
+      </HelmetProvider>
     </AuthProvider>
   );
 }

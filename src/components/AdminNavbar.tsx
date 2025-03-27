@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Settings, LogOut, Upload, User, Bell, BellDot, Mail, Phone, Calendar, Send } from 'lucide-react';
+import { Building2, Settings, LogOut, Upload, User, Bell, BellDot, Mail, Phone, Calendar } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { AccountSettings } from './AccountSettings';
 import { supabase } from '../lib/supabase';
-import { sendTestEmail } from '../lib/email';
 
 interface Notification {
   id: string;
@@ -104,9 +103,12 @@ export function AdminNavbar() {
 
   const loadNotifications = async () => {
     try {
+      if (!user) return;
+
       const { data: notifs, error } = await supabase
         .from('notifications')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(50);
 
@@ -115,7 +117,11 @@ export function AdminNavbar() {
       setNotifications(notifs || []);
       setUnreadCount(notifs?.filter(n => !n.read).length || 0);
     } catch (error) {
-      console.error('Error loading notifications:', error);
+      console.error('Error loading notifications:', {
+        error,
+        user: user?.id,
+        url: supabase.supabaseUrl
+      });
     }
   };
 
@@ -166,15 +172,6 @@ export function AdminNavbar() {
           </div>
           
           <div className="flex items-center space-x-4">
-            <button
-              onClick={async () => {
-                const result = await sendTestEmail();
-                alert(result.success ? 'Email envoyé!' : 'Erreur d\'envoi');
-              }}
-              className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <Send className="w-5 h-5 text-gray-600" />
-            </button>
             {/* Visites */}
             <button
               onClick={() => navigate('/admin/visits')}
@@ -211,7 +208,7 @@ export function AdminNavbar() {
 
               {/* Notifications dropdown */}
               {isNotificationsOpen && (
-                <div className="absolute right-0 mt-2 w-[420px] bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100">
+                <div className="absolute right-0 mt-2 w-[420px] max-w-[95vw] bg-white rounded-xl shadow-xl overflow-hidden border border-gray-100 sm:right-0 right-1/2 transform sm:translate-x-0 translate-x-1/2">
                   <div className="px-4 py-2 border-b border-gray-100">
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>

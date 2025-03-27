@@ -27,7 +27,7 @@ export function SearchFilters({
   onViewModeChange,
 }: SearchFiltersProps) {
   return (
-    <div className="bg-white rounded-xl shadow-sm p-4 mb-8">
+    <div className="bg-white rounded-xl shadow-sm p-4">
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
