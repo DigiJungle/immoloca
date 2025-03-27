@@ -13,7 +13,6 @@ export function AdminPropertyDetailPage() {
   const { id } = useParams();
   const [property, setProperty] = useState<Property | null>(null);
   const navigate = useNavigate();
-  const location = useLocation();
   const [applications, setApplications] = useState<any[]>([]);
   const [selectedApplication, setSelectedApplication] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -150,6 +149,7 @@ export function AdminPropertyDetailPage() {
 
   const handleScheduleGroupVisit = async (date: Date, duration: number) => {
     try {
+      setLoading(true);
       // Create group visit
       const { data: groupVisit, error: groupVisitError } = await supabase
         .from('group_visits')
@@ -179,9 +179,32 @@ export function AdminPropertyDetailPage() {
       // Clear selection and refresh
       setSelectedApplications([]);
       fetchApplications(property.id);
+      fetchVisits();
+      // Refresh applications list
+      const { data: updatedApps } = await supabase
+        .from('applications')
+        .select('*')
+        .eq('property_id', property.id)
+        .order('created_at', { ascending: false });
+
+      if (updatedApps) {
+        setApplications(updatedApps.map(app => ({
+          ...app,
+          createdAt: new Date(app.created_at),
+          firstName: app.first_name,
+          lastName: app.last_name,
+          documentStatus: app.document_status || {}
+        })));
+      }
+      
+      // Fermer le modal
+      setShowGroupVisitModal(false);
+
     } catch (error) {
       console.error('Error scheduling group visit:', error);
       throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -196,24 +219,12 @@ export function AdminPropertyDetailPage() {
   return (
     <>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center mb-4">
           <button
             onClick={() => {
-              // Retourner à la page précédente avec les paramètres de recherche
-              if (location.state?.from === '/admin') {
-                navigate('/admin', {
-                  state: {
-                    viewMode: location.state.viewMode,
-                    scrollPosition: location.state.scrollPosition,
-                    searchQuery: location.state.searchQuery,
-                    propertyType: location.state.propertyType,
-                    sortBy: location.state.sortBy,
-                    sortOrder: location.state.sortOrder
-                  }
-                });
-              } else {
-                navigate('/admin');
-              }
+              navigate('/admin', {
+                state: location.state
+              });
             }}
             className="flex items-center text-gray-600 hover:text-gray-900 group"
           >

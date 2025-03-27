@@ -15,11 +15,29 @@ export function AdminPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [showAddForm, setShowAddForm] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(location.state?.searchQuery || '');
-  const [propertyType, setPropertyType] = useState<'all' | 'rent' | 'sale'>(location.state?.propertyType || 'all');
-  const [sortBy, setSortBy] = useState<'date' | 'price' | 'views'>(location.state?.sortBy || 'date');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>(location.state?.sortOrder || 'desc');
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>(location.state?.viewMode || 'list');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [propertyType, setPropertyType] = useState<'all' | 'rent' | 'sale'>('all');
+  const [sortBy, setSortBy] = useState<'date' | 'price' | 'views'>('date');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(() => {
+    const savedViewMode = localStorage.getItem('adminViewMode');
+    return (savedViewMode === 'grid' || savedViewMode === 'list') ? savedViewMode : 'list';
+  });
+
+  // Restore state from location if available
+  useEffect(() => {
+    if (location.state) {
+      setSearchQuery(location.state.searchQuery || '');
+      setPropertyType(location.state.propertyType || 'all');
+      setSortBy(location.state.sortBy || 'date');
+      setSortOrder(location.state.sortOrder || 'desc');
+    }
+  }, [location.state]);
+
+  // Save view mode preference
+  useEffect(() => {
+    localStorage.setItem('adminViewMode', viewMode);
+  }, [viewMode]);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
@@ -209,10 +227,8 @@ export function AdminPage() {
   const handlePropertyAction = async (action: string, property: Property) => {
     switch (action) {
       case 'view':
-        // Sauvegarder l'état actuel avant la navigation
-        navigate(`/admin/property/${property.id}`, {
+        navigate(`/admin/property/${property.id}`, { 
           state: {
-            from: '/admin',
             viewMode,
             scrollPosition: window.scrollY,
             searchQuery,
