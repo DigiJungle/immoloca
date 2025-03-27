@@ -15,15 +15,46 @@ interface PropertyListItemProps {
 
 export function PropertyListItem({ property, viewMode, onClick, onAction }: PropertyListItemProps) {
   const [showActions, setShowActions] = React.useState(false);
+  const menuRef = React.useRef<HTMLDivElement>(null);
+  const buttonRef = React.useRef<HTMLButtonElement>(null);
+  const menuContentRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      // Ne pas fermer si on clique sur le bouton ou dans le menu
+      if (
+        buttonRef.current?.contains(event.target as Node) ||
+        menuContentRef.current?.contains(event.target as Node)
+      ) {
+        return;
+      }
+      
+      // Fermer le menu dans tous les autres cas
+      setShowActions(false);
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   
   const handleViewProperty = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
+    if (showActions) {
+      setShowActions(false);
+      return;
+    }
     const propertySlug = `${slugify(property.title)}/${property.slug}`;
     window.open(`/property/${propertySlug}`, '_blank');
   };
   
   const handleCopyLink = (e: React.MouseEvent) => {
     e.stopPropagation();
+    e.preventDefault();
+    if (showActions) {
+      setShowActions(false);
+      return;
+    }
     const propertySlug = `${slugify(property.title)}/${property.slug}`;
     navigator.clipboard.writeText(`${window.location.origin}/property/${propertySlug}`);
     alert('Lien copié dans le presse-papier !');
@@ -64,22 +95,28 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
             </div>
             <div className="relative">
               <button
+                ref={buttonRef}
                 onClick={(e) => {
                   e.stopPropagation();
                   setShowActions(!showActions);
                 }}
-                className="text-gray-400 hover:text-gray-900 p-2 rounded-full hover:bg-gray-100 relative z-50"
+                className="text-gray-400 hover:text-gray-900 p-2 rounded-full hover:bg-gray-100"
               >
                 <MoreVertical className="w-5 h-5" />
               </button>
               {showActions && (
                 <div 
-                  className="absolute right-14 top-0 bg-white rounded-lg shadow-lg py-1 z-[100] border border-gray-100"
-                  onClick={(e) => e.stopPropagation()}
+                  ref={menuContentRef}
+                  className={`absolute bg-white rounded-lg shadow-lg py-1 z-[100] border border-gray-100 min-w-[200px] transform ${
+                    viewMode === 'grid' 
+                      ? 'left-1/2 -translate-x-1/2 bottom-full mb-2'
+                      : 'right-full top-1/2 -translate-y-1/2 mr-1'
+                  }`}
                 >
                   <button
                     onClick={handleViewProperty}
                     className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                    onMouseDown={(e) => e.preventDefault()}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
                     Voir le bien
@@ -87,9 +124,11 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      e.preventDefault();
                       onAction('edit');
                     }}
                     className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                    onMouseDown={(e) => e.preventDefault()}
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Modifier
@@ -97,6 +136,7 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
                   <button
                     onClick={handleCopyLink}
                     className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
+                    onMouseDown={(e) => e.preventDefault()}
                   >
                     <Copy className="w-4 h-4 mr-2" />
                     Copier le lien
@@ -104,9 +144,11 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
+                      e.preventDefault();
                       onAction('delete');
                     }}
                     className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
+                    onMouseDown={(e) => e.preventDefault()}
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Supprimer
@@ -170,18 +212,23 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative z-10">
         <button
+          ref={buttonRef}
           onClick={(e) => {
             e.stopPropagation();
             setShowActions(!showActions);
           }}
-          className="text-gray-400 hover:text-gray-900 p-2 rounded-full hover:bg-gray-100 relative z-50"
+          className="text-gray-400 hover:text-gray-900 p-2 rounded-full hover:bg-gray-100"
         >
           <MoreVertical className="w-5 h-5" />
         </button>
         {showActions && (
           <div 
-            className="absolute right-14 top-0 bg-white rounded-lg shadow-lg py-1 z-[100] border border-gray-100"
-            onClick={(e) => e.stopPropagation()}
+            ref={menuContentRef}
+            className={`absolute bg-white rounded-lg shadow-lg py-1 z-[100] border border-gray-100 min-w-[200px] transform ${
+              viewMode === 'grid' 
+                ? 'left-1/2 -translate-x-1/2 bottom-full mb-2'
+                : 'right-[43%] top-[30%]'
+            }`}
           >
             <button
               onClick={handleViewProperty}
