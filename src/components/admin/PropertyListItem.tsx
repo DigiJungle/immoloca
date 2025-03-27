@@ -39,22 +39,12 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
   
   const handleViewProperty = (e: React.MouseEvent) => {
     e.stopPropagation();
-    e.preventDefault();
-    if (showActions) {
-      setShowActions(false);
-      return;
-    }
     const propertySlug = `${slugify(property.title)}/${property.slug}`;
     window.open(`/property/${propertySlug}`, '_blank');
   };
   
   const handleCopyLink = (e: React.MouseEvent) => {
     e.stopPropagation();
-    e.preventDefault();
-    if (showActions) {
-      setShowActions(false);
-      return;
-    }
     const propertySlug = `${slugify(property.title)}/${property.slug}`;
     navigator.clipboard.writeText(`${window.location.origin}/property/${propertySlug}`);
     alert('Lien copié dans le presse-papier !');
@@ -116,7 +106,6 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
                   <button
                     onClick={handleViewProperty}
                     className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
-                    onMouseDown={(e) => e.preventDefault()}
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
                     Voir le bien
@@ -124,11 +113,9 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      e.preventDefault();
                       onAction('edit');
                     }}
                     className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
-                    onMouseDown={(e) => e.preventDefault()}
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     Modifier
@@ -136,7 +123,6 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
                   <button
                     onClick={handleCopyLink}
                     className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center"
-                    onMouseDown={(e) => e.preventDefault()}
                   >
                     <Copy className="w-4 h-4 mr-2" />
                     Copier le lien
@@ -144,11 +130,9 @@ export function PropertyListItem({ property, viewMode, onClick, onAction }: Prop
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      e.preventDefault();
                       onAction('delete');
                     }}
                     className="w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center"
-                    onMouseDown={(e) => e.preventDefault()}
                   >
                     <Trash2 className="w-4 h-4 mr-2" />
                     Supprimer
