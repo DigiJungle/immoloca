@@ -30,7 +30,8 @@ export function PropertyList({
         ))}
       </div>
     ) : (
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl shadow-lg divide-y divide-gray-200 overflow-x-auto">
+      <div className="min-w-[800px]">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
@@ -78,6 +79,7 @@ export function PropertyList({
           </tbody>
         </table>
       </div>
+    </div>
     );
   }
 
@@ -116,7 +118,7 @@ export function PropertyList({
         ))
       ) : (
         <div className="col-span-3">
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-8">
+          <div className="bg-white rounded-xl shadow-sm overflow-x-auto mb-8">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
